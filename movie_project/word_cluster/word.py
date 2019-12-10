@@ -77,8 +77,9 @@ for title,text in texts:
 
 
 
-    pre_train = np.load("./glove.6B.50d_mat.npy", allow_pickle=True, encoding="latin1")
-    X = map(lambda x: pre_train[x][1], v_word2id)
+    #pre_train = np.load("./glove.6B.50d_mat.npy", allow_pickle=True, encoding="latin1")
+    pre_train = np.loadtxt("./glove.42B.300d.txt", encoding="latin1")
+    X = map(lambda x: pre_train[x], [v[1] for v in v_word2id])
 
 
     Y = reduce(lambda x, y: np.vstack((x, y)), X)
