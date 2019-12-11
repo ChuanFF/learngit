@@ -47,15 +47,27 @@ for title,text in texts:
     v_lemma = [lemmatizer.lemmatize(word, pos='v') for word in V]
     n_lemma_lower = [noun.lower() for noun in n_lemma]
     v_lemma_lower = [verb.lower() for verb in v_lemma]
-
+    v_lemma_lower = list(set(v_lemma_lower))
     print(len(v_lemma_lower))
 
 
     v_word2id = []
+
     try:
         for i in v_lemma_lower:
-            num = setting.get(i, 0)
-            if num != 0:
+            num = setting.get(i, -1)
+            if num == -1:
+                v_lemma_lower.remove(i)
+
+    except KeyError:
+        pass
+
+    print(len(v_lemma_lower))
+
+    try:
+        for i in v_lemma_lower:
+            num = setting.get(i, -1)
+            if num != -1:
                 v_word2id.append((i,setting[i]))
 
     except KeyError:
@@ -64,16 +76,7 @@ for title,text in texts:
     print(len(v_word2id))
 
     #对json里面没有的词进行剔除更新
-    try:
-        for i in v_lemma_lower:
-            num = setting.get(i, 0)
-            if num == 0:
-                v_lemma_lower.remove(i)
 
-    except KeyError:
-        pass
-
-    print(len(v_lemma_lower))
 
 
 
@@ -109,7 +112,7 @@ for title,text in texts:
     inertia = estimator.inertia_  # 获取聚类准则的总和
     mark = ['or', 'ob', 'og', 'ok', '^r', '+r', 'sr', 'dr', '<r', 'pr']
     # 这里'or'代表中的'o'代表画圈，'r'代表颜色为红色，后面的依次类推
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(30, 30))
     color = 0
     j = 0
     for i in label_pred:
@@ -117,7 +120,7 @@ for title,text in texts:
         j += 1
     # 为散点打上数据标签
     with open('log.txt', 'a') as f: f.writelines(' '.join(v_lemma_lower))
-    v_lemma_lower.reverse()
+    #v_lemma_lower.reverse()
 
     print('=' * 20)
     print(len(Z))
@@ -126,7 +129,7 @@ for title,text in texts:
         plt.text(x[k], y[k], v_lemma_lower[k])
     if not os.path.exists('./img'):
         os.mkdir('./img')
-    plt.savefig('./img/{0}.jpg'.format(title))
+    plt.savefig('./img/{0}_50_tai.jpg'.format(title))
     plt.show()
     plt.close()
 
