@@ -77,8 +77,8 @@ for title,text in texts:
 
 
 
-    #pre_train = np.load("./glove.6B.50d_mat.npy", allow_pickle=True, encoding="latin1")
-    pre_train = np.loadtxt("./glove.42B.300d.txt", encoding="latin1")
+    pre_train = np.load("./glove.6B.50d_mat.npy", allow_pickle=True, encoding="latin1")
+    #pre_train = np.loadtxt("./glove.42B.300d.txt", encoding="latin1")
     X = map(lambda x: pre_train[x], [v[1] for v in v_word2id])
 
 
@@ -116,12 +116,18 @@ for title,text in texts:
         plt.plot(x[j], y[j], mark[i], markersize=5)
         j += 1
     # 为散点打上数据标签
+    with open('log.txt', 'a') as f: f.writelines(' '.join(v_lemma_lower))
+    v_lemma_lower.reverse()
+
+    print('=' * 20)
+    print(len(Z))
+    print(len(v_lemma_lower))
     for k in range(len(Z)):
         plt.text(x[k], y[k], v_lemma_lower[k])
     if not os.path.exists('./img'):
         os.mkdir('./img')
     plt.savefig('./img/{0}.jpg'.format(title))
-    #plt.show()
+    plt.show()
     plt.close()
 
 
