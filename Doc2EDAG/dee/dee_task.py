@@ -19,7 +19,7 @@ from .dee_model import Doc2EDAGModel, DCFEEModel
 
 
 class DEETaskSetting(TaskSetting):
-    base_key_attrs = TaskSetting.base_key_attrs
+    base_key_attrs = TaskSetting.base_key_attrs     #获得列表 ['data_dir', 'model_dir', 'output_dir']
     base_attr_default_pairs = [
         ('train_file_name', 'train.json'),
         ('dev_file_name', 'dev.json'),
@@ -27,7 +27,7 @@ class DEETaskSetting(TaskSetting):
         ('summary_dir_name', '/tmp/Summary'),
         ('max_sent_len', 128),
         ('max_sent_num', 64),
-        ('train_batch_size', 64),
+        ('train_batch_size', 32),
         ('gradient_accumulation_steps', 8),
         ('eval_batch_size', 2),
         ('learning_rate', 1e-4),
@@ -38,7 +38,7 @@ class DEETaskSetting(TaskSetting):
         ('optimize_on_cpu', False),
         ('fp16', False),
         ('use_bert', False),  # whether to use bert as the encoder
-        ('bert_model', 'bert-base-chinese'),  # use which pretrained bert model
+        ('bert_model', 'bert-base-chinese'),  # use which pretrained bert model,    en：bert-base-uncased
         ('only_master_logging', True),  # whether to print logs from multiple processes
         ('resume_latest_cpt', True),  # whether to resume latest checkpoints when training for fault tolerance
         ('cpt_file_name', 'Doc2EDAG'),  # decide the identity of checkpoints, evaluation results, etc.
@@ -65,22 +65,24 @@ class DEETaskSetting(TaskSetting):
         ('neg_field_loss_scaling', 3.0),  # prefer FNs over FPs
     ]
 
-    def __init__(self, **kwargs):
-        super(DEETaskSetting, self).__init__(
-            self.base_key_attrs, self.base_attr_default_pairs, **kwargs
+    def __init__(self, **kwargs):   #字典形式获得参数
+        super(DEETaskSetting, self).__init__(   #继承父类,父类有与其相同属性时，父类的值覆盖掉其该属性的值
+            self.base_key_attrs, self.base_attr_default_pairs, **kwargs     #kwargs包含了base_attr_default_pairs,此外还有用户自定义的参数值如task_name
         )
 
 
 class DEETask(BasePytorchTask):
     """Doc-level Event Extraction Task"""
 
-    def __init__(self, dee_setting, load_train=True, load_dev=True, load_test=True,
+    def __init__(self, dee_setting, load_train=True, load_dev=True, load_test=True, #dee_setting包含设置参数
                  parallel_decorate=True):
-        super(DEETask, self).__init__(dee_setting, only_master_logging=dee_setting.only_master_logging)
+        print('h1:'+str(dee_setting))
+        super(DEETask, self).__init__(dee_setting, only_master_logging=dee_setting.only_master_logging)     #only_master_logging = True,会打印出dee_setting
+        print('h3:' + str(self.setting))
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logging('Initializing {}'.format(self.__class__.__name__))
 
-        self.tokenizer = BERTChineseCharacterTokenizer.from_pretrained(self.setting.bert_model)
+        self.tokenizer = BERTChineseCharacterTokenizer.from_pretrained(self.setting.bert_model) #只有super后才有self.setting,bert_model决定了用哪个bert模型
         self.setting.vocab_size = len(self.tokenizer.vocab)
 
         # get entity and event label name

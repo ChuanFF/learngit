@@ -31,13 +31,13 @@ def parse_args(in_args=None):
                             help='Whether to re-evaluate previous predictions')
 
     # add task setting arguments
-    for key, val in DEETaskSetting.base_attr_default_pairs:
-        if isinstance(val, bool):
+    for key, val in DEETaskSetting.base_attr_default_pairs:     #遍历参数名与参数值
+        if isinstance(val, bool):   #isinstance() 认为子类是一种父类类型，考虑继承关系。
             arg_parser.add_argument('--' + key, type=strtobool, default=val)
         else:
             arg_parser.add_argument('--'+key, type=type(val), default=val)
 
-    arg_info = arg_parser.parse_args(args=in_args)
+    arg_info = arg_parser.parse_args(args=in_args)  #获得所有参数
 
     return arg_info
 
@@ -45,22 +45,22 @@ def parse_args(in_args=None):
 if __name__ == '__main__':
     in_argv = parse_args()
 
-    task_dir = os.path.join(in_argv.exp_dir, in_argv.task_name)
+    task_dir = os.path.join(in_argv.exp_dir, in_argv.task_name) #当前任务的路径
     if not os.path.exists(task_dir):
         os.makedirs(task_dir, exist_ok=True)
 
-    in_argv.model_dir = os.path.join(task_dir, "Model")
-    in_argv.output_dir = os.path.join(task_dir, "Output")
+    in_argv.model_dir = os.path.join(task_dir, "Model")     #添加了属性model_dir，值为Model结尾的路径字符串
+    in_argv.output_dir = os.path.join(task_dir, "Output")   #同上
 
     # in_argv must contain 'data_dir', 'model_dir', 'output_dir'
-    dee_setting = DEETaskSetting(
-        **in_argv.__dict__
+    dee_setting = DEETaskSetting(   #dee_setting的属性包含所有设置参数
+        **in_argv.__dict__      #**kwargs：把N个关键字参数转换成字典额方式。in_argv包含了用户自定义的参数值 __dict__ 获得所有属性名与属性值
     )
 
     # build task
-    dee_task = DEETask(dee_setting, load_train=not in_argv.skip_train)
+    dee_task = DEETask(dee_setting, load_train=not in_argv.skip_train)  #实例化
 
-    if not in_argv.skip_train:
+    if not in_argv.skip_train:  #如果不跳过训练
         # dump hyper-parameter settings
         if dee_task.is_master_node():
             fn = '{}.task_setting.json'.format(dee_setting.cpt_file_name)

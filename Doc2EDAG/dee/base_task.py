@@ -60,17 +60,17 @@ class TaskSetting(object):
         ('summary_dir_name', '/root/summary'),
     ]
 
-    def __init__(self, key_attrs, attr_default_pairs, **kwargs):
-        for key_attr in TaskSetting.base_key_attrs:
+    def __init__(self, key_attrs, attr_default_pairs, **kwargs):    #在dee_task的实例化中，将['data_dir', 'model_dir', 'output_dir']赋给key_attrs，参数赋给attr_default_pairs，setattr能创建属性并赋值
+        for key_attr in TaskSetting.base_key_attrs:                 #遍历['data_dir', 'model_dir', 'output_dir']，添加到self属性并赋值
             setattr(self, key_attr, kwargs[key_attr])
 
-        for attr, val in TaskSetting.base_attr_default_pairs:
+        for attr, val in TaskSetting.base_attr_default_pairs:       #将参数赋给属性，使用的是上面的列表
             setattr(self, attr, val)
 
-        for key_attr in key_attrs:
+        for key_attr in key_attrs:                                  #遍历['data_dir', 'model_dir', 'output_dir']，添加到self属性并赋值
             setattr(self, key_attr, kwargs[key_attr])
 
-        for attr, val in attr_default_pairs:
+        for attr, val in attr_default_pairs:                        #将参数赋给属性，当kwargs存在attr时，使用它；否则使用attr_default_pairs的
             if attr in kwargs:
                 setattr(self, attr, kwargs[attr])
             else:
@@ -122,11 +122,12 @@ class BasePytorchTask(object):
     """Basic task to support deep learning models on Pytorch"""
 
     def __init__(self, setting, only_master_logging=False):
-        self.setting = setting
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.setting = setting  #self:dee_task, setting:dee_setting
+        print('h4:' + str(self.setting))
+        self.logger = logging.getLogger(self.__class__.__name__)    # logger：提供日志接口，供应用代码使用。
         self.only_master_logging = only_master_logging
 
-        if self.in_distributed_mode() and not dist.is_initialized():
+        if self.in_distributed_mode() and not dist.is_initialized():    #local_rank大于等于0时候，in_distributed_mode返回True
             # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
             dist.init_process_group(backend='nccl')
             # dist.init_process_group(backend='gloo')  # 3 times slower than nccl for gpu training
@@ -137,7 +138,7 @@ class BasePytorchTask(object):
             ))
             dist.barrier()
 
-        self._check_setting_validity()
+        self._check_setting_validity()  ##打印设置日志
         self._init_device()
         self.reset_random_seed()
         self.summary_writer = None
@@ -175,7 +176,7 @@ class BasePytorchTask(object):
         else:
             self.logger.log(level, msg)
 
-    def _check_setting_validity(self):
+    def _check_setting_validity(self):  #打印设置日志
         self.logging('='*20 + 'Check Setting Validity' + '='*20)
         self.logging('Setting: {}'.format(
             json.dumps(self.setting.__dict__, ensure_ascii=False, indent=2)
@@ -232,7 +233,7 @@ class BasePytorchTask(object):
 
     def is_master_node(self):
         if self.in_distributed_mode():
-            if dist.get_rank() == 0:
+            if dist.get_rank() == 0:    #dist.get_rank() Returns the rank of current process group
                 return True
             else:
                 return False
